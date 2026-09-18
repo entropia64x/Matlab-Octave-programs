@@ -1,113 +1,147 @@
-## Copyright (C) 2019-2020 entropia64x
+## Copyright (C) 2019-2026 entropia64x
 
 ## -*- texinfo -*-
 ##
-## @deftypefn  {} {} mat2latex (@var{matriz})
-## @deftypefnx {} {} mat2latex (@var{matriz}, @var{num_col})
+## @deftypefn  {} {} mat2latex (@var{matrix})
+## @deftypefnx {} {} mat2latex (@var{matrix}, @var{col_num})
+## @deftypefnx  {} {} mat2latex (@var{matrix}, @var{mtype})
+## @deftypefnx  {} {} mat2latex (@var{matrix}, @var{col_num}, @var{mtype})
 ##
-## Devuelve una el codigo en LaTeX de una matriz 
-## numerica @var{matriz}.
-## 
-## Si se desea convertir una matriz de caracteres,
-## debe estar en formato de celda.
+## Returns the LaTeX code of a matrix @var{matrix}.
+##
+## If it's a character matrix, it must be in cell format.
 ## @example
 ## @group
-## matriz = {'x1', 'x2', 'x3')
-## mat2latex(matriz)
+## M = @{'a', 'b';'c', 'd'@};
+## mat2latex (M)
+## @result{}
+## \begin@{pmatrix@}
+## a & b \\
+## c & d
+## \end@{pmatrix@}
 ## @end group
 ## @end example
 ##
-## Si se desea una matriz aumentada con separacion | en
-## la k-esima columna escribimos @var{num_col} = k.
+## If it's an augmented matrix with separation | in the
+## k-th column, we write  @var{col_num} = k.
 ## @example
 ## @group
-## matriz = magic(3)
-## b = [1;2;3];
-## aumentada = [matriz b];
-## mat2latex(aumentada,3)
+## A = reshape (1:6, [3, 2])'
+## @result{}
+##   1   2   3
+##   4   5   6
+## mat2latex (A, 2)
+## @result{}
+## \begin@{pmatrix@}
+## 1 & 2 & | & 3 \\
+## 4 & 5 & | & 6
+## \end@{pmatrix@}
 ## @end group
 ## @end example
 ##
-## @end deftypefn
+## We can specify the type of delimiters we want to use
+## by writing 'p','b','v','B','V', or 'none'. By default
+## @var{mtype} = 'p'.
+##
+## @example
+## @group
+## mat2latex (magic(2), 'v')
+## @result{}
+## \begin@{vmatrix@}
+## 4 & 3 \\
+## 1 & 2
+## \end@{vmatrix@}
+## @end group
+## @end example
+##
+## We also can use both @var{col_num} and @var{mtype} in any order.
+##
+## @seealso{latex2mat, mat2system}
+## @end defmtypefn
 
 ## author: entropia64x
 
-function codigo = mat2latex(matriz,varargin)
+function latexcode = mat2latex(matrix, varargin)
   
   if ( nargin < 1 || nargin > 4 )
     print_usage();
-  elseif ( ~ismatrix(matriz) && ~iscellstr(matriz) )
-    error('El primer termino debe ser una matriz numerica o una celda de caracteres.');
+  elseif ( ~ismatrix(matrix) && ~iscellstr(matrix) )
+    error('The first term must be a numeric matrix or a string cell.');
   else
-    [num_col, tipo] = esAumentadaQueDelimitadores(matriz,varargin);
+    [col_num, mtype] = analyzeVarargin(matrix, varargin);
   end
   
-  eranumerica = isnumeric(matriz);
+  wasnotcell = isnumeric(matrix);
   
-  if ( eranumerica )
-    x = ones(1,rows(matriz));
-    y = ones(1,columns(matriz));
-    matriz = mat2cell(matriz,x,y);
+  if ( wasnotcell )
+    matrix = mat2cell(matrix, ones(1, rows(matrix)), ones(1, columns(matrix)));
   end
   
-  codigo = LaTeX(matriz,eranumerica,num_col,tipo);
+  latexcode = LaTeX(matrix, col_num, mtype);
 endfunction
 
-function [num_col, tipo] = esAumentadaQueDelimitadores(matriz,argEntrada)
+function [col_num, mtype] = analyzeVarargin(matrix, argIn)
+
+  col_num = false; 
+  mtype = 'p';
   
-  num_col = false; 
-  tipo = 'p';
-  
-  while( ~isempty(argEntrada) ) 
- 
-    tiposdeMatriz = {'p','b','v','B','V','none'}; 
-    if( ~isempty(find (strcmpi (argEntrada{1}, tiposdeMatriz),1)) )
-      tipo = argEntrada{1};
-      if ( tipo == 'none' )
-        tipo = '';
+  while( ~isempty(argIn) ) 
+
+    kindOfMatrix = {'p','b','v','B','V','none'};
+    if ( ischar(argIn{1}) )
+      if ( ~isempty(find (strcmpi (argIn{1}, kindOfMatrix), 1)) )
+        mtype = argIn{1};
+        if ( mtype == 'none' )
+          mtype= '';
+        end
+      else
+        error("MTYPE must be 'p','b','v','B','V or 'none'");
       end
-    elseif ( isscalar(argEntrada{1}) )
-      num_col = argEntrada{1};
-      if ( num_col - fix(num_col) || num_col < 1 || num_col > columns(matriz) - 1 )
-        error("El numero debe ser entero positivo mayor menor que el numero de columas de la matriz");
+    elseif ( isscalar(argIn{1}) )
+      col_num = argIn{1};
+      if ( col_num - fix(col_num) || col_num < 1 || col_num > columns(matrix) - 1 )
+        error('The number must be a positive integer less than the number of matrix columns');
       end
     else
-      print_usage();
+      error("The second argument must be a positive integer or 'p','b','v','B','V, 'none'");
     end
     
-    argEntrada(1) = [];
+    argIn(1) = [];
   end
   
 end
 
-function codigo = LaTeX(matriz, eranumerica, num_col, tipo)
+function latexcode = LaTeX(matrix, col_num, mtype)
   
-  codigo = '';
-  codigo = [codigo '\begin{' tipo 'matrix}'];
+  latexcode = "\n";
+  latexcode = [latexcode '\begin{' mtype 'matrix}' "\n"];
   
-  for  ( ren = 1:rows(matriz) )
-    for ( col = 1:columns(matriz) )
-      if ( eranumerica )
-        entrada = strtrim(rats(matriz{ren,col}));
-      else
-        entrada = matriz{ren,col};
+  totalrows = rows(matrix);
+  totalcols = columns(matrix);
+  
+  for  ( row = 1:totalrows )
+    for ( col = 1:totalcols )
+        
+      entry = matrix{row,col};
+      if ( isnumeric(entry) )
+        entry = strtrim(rats(entry));
       end
      
-      if ( num_col && col == num_col + 1 )
-          codigo = [codigo '|&' entrada];
+      if ( col_num && col == col_num + 1 )
+          latexcode = [latexcode '| & ' entry];
       else
-        codigo = [codigo entrada];
+        latexcode = [latexcode entry];
       end
       
-      if ( col < columns(matriz) )
-        codigo = [codigo '&'];
-      elseif ( ren < rows(matriz) )
-        codigo = [codigo '\\'];
+      if ( col < totalcols )
+        latexcode = [latexcode ' & '];
+      elseif ( row < totalrows )
+        latexcode = [latexcode ' \\' "\n"];
       end
       
     end
   end
   
-  codigo = [codigo '\end{' tipo 'matrix}'];
-  codigo = strrep(codigo,"-0&","0&");
+  latexcode = [latexcode "\n" '\end{' mtype 'matrix}'];
+  latexcode = strrep(latexcode," -0 &"," 0 &");
 end
