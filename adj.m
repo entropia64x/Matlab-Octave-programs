@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2020 entropia64x
+## Copyright (C) 2019-2026 entropia64x
 
 ## -*- texinfo -*-
 ##
@@ -17,7 +17,7 @@ function B = adj(A)
   end
   
   if ( ~size_equal(A) )
-    error("Debe ser una matriz cuadrada")
+    error('Debe ser una matriz cuadrada')
   end
   
   B = A;
