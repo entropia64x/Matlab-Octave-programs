@@ -1,34 +1,56 @@
-## Copyright (C) 2019-2021 entropia64x
+## Copyright (C) 2019-2026 entropia64x
 
 ## -*- texinfo -*-
 ##
-## @deftypefn  {} {} mat2system (@var{matrizaum})
-## @deftypefnx {} {} mat2system (@var{matrizaum}, @var{variables})
+## @deftypefn  {} {} mat2system (@var{matrix})
+## @deftypefnx {} {} mat2system (@var{matrix}, @var{vars})
 ##
-## Devuelve el codigo en LaTeX del sistema lineal
-## asociado a la matriz aumentada @var{matrizaum}.
-## 
-## Si se desean especificar los caracteres, 
-## debe estar en formato de celda.
+## Returns a string with the LaTeX code of the
+## linear system associated to the augmented matrix.
+##
 ## @example
 ## @group
-## A = magic(3);
-## b = [1 2 3]';
-## x = @{'x', 'y', 'z'@}
-## mat2system([A b],x)
+## A = reshape(1:12, [3, 4])
+## @result{}
+##    1    4    7   10
+##    2    5    8   11
+##    3    6    9   12
+## mat2system (A)
+## @result{}
+## x_1 + 2x_2 + 3x_3 = 4 \\
+## 5x_1 + 6x_2 + 7x_3 = 8 \\
+## 9x_1 + 10x_2 + 11x_3 = 12
 ## @end group
 ## @end example
 ##
+## To specify the variables, they must be
+## in cell format.
+##
+## For example:
+##
+## @example
+## @group
+## A = reshape(1:12, [3, 4]);
+## x = @{'x', 'y', 'z'@};
+## mat2system (A, x)
+## @result{}
+## x + 2y + 3z = 4 \\
+## 5x + 6y + 7z = 8 \\
+## 9x + 10y + 11z = 12
+## @end group
+## @end example
+##
+## @seealso{mat2latex, latex2mat}
 ## @end deftypefn
 
 ## author: entropia64x
 
-function codigo = mat2system(matrizaum,varargin)
+function code = mat2system(augmatrix, varargin)
   
   if ( nargin < 1 || nargin > 2 )
     print_usage();
-  elseif ( ~ismatrix(matrizaum) && ~iscellstr(matrizaum) )
-    error('El primer termino debe ser una matriz numerica o una celda de caracteres.');
+  elseif ( ~ismatrix(augmatrix) && ~iscellstr(augmatrix) )
+    error('The notfirst term must be a numeric matrix, or a character cell.')
   end
   
   v = {};
@@ -37,65 +59,72 @@ function codigo = mat2system(matrizaum,varargin)
     v = varargin{1};
     
     if ( ~iscellstr(v) )
-      error("El segundo argumento debe ser una celda de caracteres con las variables");
+      error('The second argument must be a character cell with the desired variables.')
     end
     
-    if ( columns(matrizaum) - 1 ~= length(v) )
-      error("El numero de columnas menos uno y de variables debe coincidir") 
+    if ( columns(augmatrix) - 1 ~= length(v) )
+      error('The number of columns minus one and the number of variables must be de same.')
     end
   end
   
-  eranumerica = isnumeric(matrizaum);
+  wasnotcell = isnumeric(augmatrix);
   
-  if ( eranumerica )
-    x = ones(1,rows(matrizaum));
-    y = ones(1,columns(matrizaum));
-    matrizaum = mat2cell(matrizaum,x,y);
+  if ( wasnotcell )
+    augmatrix = mat2cell(augmatrix, ones(1, rows(augmatrix)), ones(1, columns(augmatrix)));
   end
   
-  codigo = LaTeX(matrizaum,eranumerica,v);
+  code = latex(augmatrix, v);
 endfunction
 
-function codigo = LaTeX(matrizaum, eranumerica,v)
+function code = latex(augmatrix, v)
   
-  codigo = '';
+  code = '';
+  totalrows = rows(augmatrix);
+  totalcols = columns(augmatrix);
   
-  for  ( ren = 1:rows(matrizaum) )
+  for  ( row = 1:totalrows )
     
-    primero = false;
+    notfirst = false;
     
-    for ( col = 1:columns(matrizaum) )
-      
-      if ( eranumerica )
-        entrada = strtrim(rats(matrizaum{ren,col}));
-      else
-        entrada = matrizaum{ren,col};
+    for ( col = 1:totalcols )
+
+      entry = augmatrix{row,col};
+
+      if ( isnumeric(entry) )
+        entry = strtrim(rats(entry));
       end
       
-      if ( col < columns(matrizaum) && ~strcmpi(entrada,'0') && ~strcmpi(entrada,'-0') )
-      
-        if( primero && isempty(strfind(entrada,'-')) )
-          codigo = [codigo '+'];
+      if ( col < columns(augmatrix) && ~strcmpi(entry,'0') && ~strcmpi(entry,'-0') )
+        if( notfirst )
+          if( strfind(entry,'-') )
+            code = [code ' - '];
+          else
+            code = [code ' + '];
+          end
         end
         
-        primero = true;
-        
-        if( ~( strcmpi(entrada,'1') || strcmpi(entrada,'-1') ) )
-          codigo = [codigo entrada];
-        elseif( strcmpi(entrada,'-1') )
-          codigo = [codigo '-'];
+        if( ~( strcmpi(entry,'1') || strcmpi(entry,'-1') ) )
+          if ( notfirst )
+            entry = strrep(entry, '-', '');
+          end
+
+          code = [code entry];
+        elseif( strcmpi(entry,'-1') )
+          code = [code '-'];
         end
+
+        notfirst = true;
         
         if ( isempty(v) )
-          codigo = [codigo 'x_' num2str(col)];
+          code = [code 'x_' num2str(col)];
         else
-          codigo = [codigo v{col}];
+          code = [code v{col}];
         end
       
-      elseif ( col == columns(matrizaum) )
-        codigo = [codigo '=' entrada];
-        if ( ren < rows(matrizaum) )
-            codigo = [codigo '\\'];
+      elseif ( col == columns(augmatrix) )
+        code = [code ' = ' entry];
+        if ( row < rows(augmatrix) )
+            code = [code ' \\ '];
         end
       end
     end
