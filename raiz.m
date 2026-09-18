@@ -1,9 +1,9 @@
-## Copyright (C) 2019-2021 entropia64x
+## Copyright (C) 2019-2026 entropia64x
 
 ## -*- texinfo -*-
 ##
-## @deftypefn  {} {} raiz (@var{mÈtodo}, @var{funcion}, @var{x0})
-## @deftypefnx {} {} raiz (@var{mÈtodo}, @var{funcion}, @var{x0}, @var{x1})
+## @deftypefn  {} {} raiz (@var{m√©todo}, @var{funcion}, @var{x0})
+## @deftypefnx {} {} raiz (@var{m√©todo}, @var{funcion}, @var{x0}, @var{x1})
 ## @deftypefnx {} {} raiz (@dots{}, @var{max_iter})
 ## @deftypefnx {} {} raiz (@dots{}, @var{max_iter}, @var{tol})
 ## @deftypefnx {} {} raiz (@dots{}, 'g', @var{intervalo})
@@ -11,61 +11,61 @@
 ## @deftypefnx {} {[@var{x}, @var{iter}] =} raiz (@dots{})
 ## @deftypefnx {} {[@var{x}, @var{iter}, @var{err_abs}] =} raiz (@dots{})
 ##
-## Devuelve una aproximaciÛn de la raÌz de @var{funcion}
-## utilizando el @var{mÈtodo} especificado. Las funciones
+## Devuelve una aproximaci√≥n de la ra√≠z de @var{funcion}
+## utilizando el @var{m√©todo} especificado. Las funciones
 ## tienen que ir en formato de texto o como funciones
-## incÛgnito y de forma vectorial
+## inc√≥gnito y de forma vectorial
 ## si se desea hacer graficas.
 ##
-## Los distintos mÈtodos que soporta se enlistan a continuaciÛn.
+## Los distintos m√©todos que soporta se enlistan a continuaci√≥n.
 ## @table @asis
-## @item MÈtodos:
+## @item M√©todos:
 ##
 ## @multitable @columnfractions 0.06 0.94
-## @item @samp{b}  @tab MÈtodo de bisecciÛn.
-## @item @samp{p}  @tab MÈtodo de punto fijo.
-## @item @samp{a}  @tab MÈtodo de Aitken.
-## @item @samp{n}  @tab MÈtodo de Newton-Raphson.
-## @item @samp{s}  @tab MÈtodo de la secante.
-## @item @samp{f}  @tab MÈtodo de la falsa posicion.
+## @item @samp{b}  @tab M√©todo de bisecci√≥n.
+## @item @samp{p}  @tab M√©todo de punto fijo.
+## @item @samp{a}  @tab M√©todo de Aitken.
+## @item @samp{n}  @tab M√©todo de Newton-Raphson.
+## @item @samp{s}  @tab M√©todo de la secante.
+## @item @samp{f}  @tab M√©todo de la falsa posicion.
 ## @end multitable
 ## @end table
 ##
-## Los mÈtodos de punto fijo, Aitken  y de Newton-Raphson
+## Los m√©todos de punto fijo, Aitken  y de Newton-Raphson
 ## solo necesitan un punto inicial x0.
 ## Los otros necesitan de dos puntos iniciales: x0 y x1.
 ##
-## Si se desea una gr·fica, basta con agregar @qcode{'g'} y
+## Si se desea una gr√°fica, basta con agregar @qcode{'g'} y
 ## a la derecha un intervalo en formato de vector.
 ## Por ejemplo @var{intervalo} = [1 2]. El intervalo es
-## para especificar la mÌnima longitud del 'eje x',
-## pero esta longitud se agranda si el mÈtodo lo requiere.
+## para especificar la m√≠nima longitud del 'eje x',
+## pero esta longitud se agranda si el m√©todo lo requiere.
 ## El 'eje y' se ajusta solo.
 ##
 ## Si se desea una tabla, se debe agregar @qcode{'t'}.
 ## La tabla se guarda en un archivo de texto llamado
 ## raiz.txt.
 ##
-## @var{max_iter} es el n˙mero m·ximo de iteraciones que
+## @var{max_iter} es el n√∫mero m√°ximo de iteraciones que
 ## se desean hacer. Por defecto se toma @var{max_iter} = 100.
 ##
 ## @var{tol} es la tolerancia de la aproximacion del
 ## error absoluto. Por defecto se toma @var{tol} = 1e-6.
 ## La formula es |x_n - x_{n-1}|. Si se desea
 ## especificar la tolerancia, primero hay que poner el
-## n˙mero m·ximo de iteraciones.
+## n√∫mero m√°ximo de iteraciones.
 ##
 ## Algunos ejemplos de su uso son los siguientes:
 ##
 ## @noindent
-## Si se desea encontrar una raÌz entre 1 y 2 de la funciÛn
-## x^2 - 2 por el mÈtodo de bisecciÛn escribimos
+## Si se desea encontrar una ra√≠z entre 1 y 2 de la funci√≥n
+## x^2 - 2 por el m√©todo de bisecci√≥n escribimos
 ##
 ## @example
 ## raiz('b',@@(x) x.^2 - 2,1,2)
 ## @end example
 ##
-## Si desamos saber la informaciÛn de las iteraciones
+## Si desamos saber la informaci√≥n de las iteraciones
 ## y el error absoluto escribimos
 ##
 ## @example
@@ -73,8 +73,8 @@
 ## @end example
 ##
 ## @noindent
-## Si no queremos esa informaciÛn y por el contrario
-## queremos una gr·fica y solo 4 iteraciones escribimos
+## Si no queremos esa informaci√≥n y por el contrario
+## queremos una gr√°fica y solo 4 iteraciones escribimos
 ##
 ## @example
 ## raiz ('b', @@(x) x.^2 - 2,1,2), 'g', [1 2], 4)
@@ -187,17 +187,17 @@ function [f, nombrefn, x1, intervalo, idTabla, max_iter, tol, titulo] = iniciali
 
   switch ( metodo )
     case 'b'
-      titulo = 'MÈtodo de bisecciÛn';
+      titulo = 'M√©todo de bisecci√≥n';
     case 'p'
-      titulo = 'MÈtodo de punto fijo';
+      titulo = 'M√©todo de punto fijo';
     case 'a'
-      titulo = 'MÈtodo de Aitken';
+      titulo = 'M√©todo de Aitken';
     case 'n'
-      titulo = 'MÈtodo de Newton-Raphson';
+      titulo = 'M√©todo de Newton-Raphson';
     case 's'
-      titulo = 'MÈtodo de la secante';
+      titulo = 'M√©todo de la secante';
     case 'f'
-      titulo = 'MÈtodo de la falsa posiciÛn';
+      titulo = 'M√©todo de la falsa posici√≥n';
   end
 
   while ( ~isempty(argentvar) )
