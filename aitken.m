@@ -1,4 +1,4 @@
-## Copyright (C) 2021 entropia64x
+## Copyright (C) 2022-2026 entropia64x
 
 ## -*- texinfo -*- 
 ## @deftypefn {} {@var{x} =} aitken (@var{f}, @var{x0})
